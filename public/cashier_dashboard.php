@@ -1,0 +1,1 @@
+// the cashier Dasboard is also the waitter dashboard as well

@@ -1,0 +1,1 @@
+// the barista dashboard is also the kitchen dashboard as well
