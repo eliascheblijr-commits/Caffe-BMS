@@ -16,8 +16,10 @@ services:
       - ./private:/var/www/html/private
       - ./.env:/var/www/html/.env
       - ./deployment/docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+    depends_on:
+      - db
     networks:
-      - gym_network
+      - caffe_network
 
   # 2. NGINX (The entry point)
   web:
@@ -29,12 +31,32 @@ services:
     volumes:
       # STRICT LEAST-PRIVILEGE MOUNTS
       - ./public:/var/www/html/public
-      - ./deployment/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./deployment/docker/nginx/compose.conf:/etc/nginx/conf.d/default.conf
       - ./deployment/docker/nginx/init-realip.sh:/docker-entrypoint.d/init-realip.sh
     depends_on:
       - app
     networks:
       - caffe_network
+
+  # 3. DATABASE (MySQL 8 — required for utf8mb4_0900_ai_ci collation used in the schema)
+  db:
+    image: mysql:8.0
+    container_name: caffe_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - caffe_db_data:/var/lib/mysql
+      # Auto-imported by the MySQL entrypoint only on first boot (empty data dir)
+      - ./deployment/caffe.sql:/docker-entrypoint-initdb.d/01-caffe.sql
+    networks:
+      - caffe_network
+
+volumes:
+  caffe_db_data:
 
 networks:
   caffe_network:

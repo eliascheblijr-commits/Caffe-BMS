@@ -37,7 +37,8 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Link your custom Nginx virtual host configuration rule directly into Alpine's default directory
-COPY ./deployment/docker/nginx/default.conf /etc/nginx/http.d/default.conf
+# (standalone.conf: nginx + php-fpm share this one container, so upstream is 127.0.0.1:9000)
+COPY ./deployment/docker/nginx/standalone.conf /etc/nginx/http.d/default.conf
 
 # Expose the public HTTP router port natively
 EXPOSE 80
