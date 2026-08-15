@@ -1,0 +1,13 @@
+{
+    "name": "caffe/bms",
+    "description": "Caffe BMS \u2014 caf\u00e9 business management system",
+    "type": "project",
+    "require": {
+        "php": ">=8.2",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

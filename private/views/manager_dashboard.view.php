@@ -149,6 +149,7 @@
                     <th>Email</th>
                     <th>Role</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -158,10 +159,22 @@
                         <td><?= htmlspecialchars($member['email'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars(ucfirst($member['role_name']), ENT_QUOTES, 'UTF-8') ?></td>
                         <td><span class="status-pill status-pill--<?= $member['status'] === 'active' ? 'active' : 'inactive' ?>"><?= htmlspecialchars($member['status'], ENT_QUOTES, 'UTF-8') ?></span></td>
+                        <td>
+                            <button type="button" class="btn-toggle js-toggle" data-target="reset-<?= (int) $member['id'] ?>">Reset Password</button>
+                            <form method="post" action="/manager_dashboard.php" class="reset-password-form" id="reset-<?= (int) $member['id'] ?>" hidden>
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+                                <input type="hidden" name="action" value="reset_password">
+                                <input type="hidden" name="user_id" value="<?= (int) $member['id'] ?>">
+                                <input type="text" name="new_password" placeholder="New password" minlength="8" required>
+                                <button type="submit" class="btn-toggle">Confirm</button>
+                            </form>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </main>
+
+    <script src="/js/main.js"></script>
 </body>
 </html>

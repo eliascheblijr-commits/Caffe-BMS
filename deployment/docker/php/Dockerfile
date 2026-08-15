@@ -1,6 +1,9 @@
 # 1. THE BASE IMAGE
 FROM php:8.2-fpm-alpine
 
+# Composer binary, copied in rather than curl-piped
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 # 2. SYSTEM DEPENDENCIES (Required for Composer & PHP extensions + Nginx for Staging Unified Compute)
 RUN apk add --no-cache \
     libzip-dev \
@@ -35,6 +38,9 @@ WORKDIR /var/www/html
 # 7. UNIFIED STAGING LAYER BOUNDS
 # Copy application code straight into the container workspace to build a standalone artifact
 COPY . /var/www/html
+
+# Install PHP dependencies (PHPMailer, etc.) declared in composer.json
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Link your custom Nginx virtual host configuration rule directly into Alpine's default directory
 # (standalone.conf: nginx + php-fpm share this one container, so upstream is 127.0.0.1:9000)

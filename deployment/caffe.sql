@@ -299,6 +299,25 @@ CREATE TABLE `payments` (
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ---------------------------------------------------------------------------
+-- password_resets
+-- Tokens are stored hashed (never the raw token) so a DB leak alone can't
+-- be used to reset an account. One-time use via used_at.
+-- ---------------------------------------------------------------------------
+DROP TABLE IF EXISTS `password_resets`;
+CREATE TABLE `password_resets` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `token_hash` char(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_password_resets_user` (`user_id`),
+  KEY `idx_password_resets_token` (`token_hash`),
+  CONSTRAINT `fk_password_resets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ---------------------------------------------------------------------------
 -- Seed data: roles
 -- ---------------------------------------------------------------------------
 INSERT INTO `roles` (`name`, `description`) VALUES

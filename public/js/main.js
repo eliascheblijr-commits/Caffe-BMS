@@ -146,12 +146,13 @@
   }
 
   /**
-   * Per-order "Collect Payment" toggles on the cashier's ready-for-pickup
-   * board. Uses the native `hidden` attribute rather than a CSS class —
-   * no inline styles either way.
+   * Generic reveal-on-click toggle, used by both the cashier's "Collect
+   * Payment" button and the manager's "Reset Password" button. Uses the
+   * native `hidden` attribute rather than a CSS class — no inline styles
+   * either way.
    */
-  function initPaymentToggles() {
-    var toggles = document.querySelectorAll('.js-toggle-payment');
+  function initToggles() {
+    var toggles = document.querySelectorAll('.js-toggle');
     toggles.forEach(function (btn) {
       btn.addEventListener('click', function () {
         var targetId = btn.getAttribute('data-target');
@@ -165,7 +166,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initMenuButtons();
-    initPaymentToggles();
+    initToggles();
     renderCart();
   });
 })();

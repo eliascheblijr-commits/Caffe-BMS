@@ -91,7 +91,7 @@
                             <div class="order-card-customer"><?= htmlspecialchars($order['customer_name'], ENT_QUOTES, 'UTF-8') ?></div>
                         <?php endif; ?>
 
-                        <button type="button" class="btn-advance js-toggle-payment" data-target="payment-<?= (int) $order['id'] ?>">
+                        <button type="button" class="btn-advance js-toggle" data-target="payment-<?= (int) $order['id'] ?>">
                             Collect Payment
                         </button>
 

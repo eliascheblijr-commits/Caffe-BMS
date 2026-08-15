@@ -49,6 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($created === null) {
                 $error = 'Could not add that staff member — check the email is unique, the password is at least 8 characters, and the role is valid.';
             }
+        } elseif ($action === 'reset_password') {
+            $targetUserId = (int) ($_POST['user_id'] ?? 0);
+            $newPassword = (string) ($_POST['new_password'] ?? '');
+
+            if ($targetUserId > 0 && !reset_staff_password(db(), $user['cafe_id'], $targetUserId, $newPassword, $user['role'])) {
+                $error = 'Could not reset that password — check it\'s at least 8 characters and you have permission.';
+            }
         }
     }
 

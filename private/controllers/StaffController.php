@@ -93,3 +93,38 @@ function create_staff_member(
 
     return (int) $db->lastInsertId();
 }
+
+/**
+ * Manager-assisted password reset — sets a new password directly, no email
+ * involved. Same admin-protection rule as role assignment: a non-admin
+ * can't reset an admin's password, regardless of what the form sent.
+ */
+function reset_staff_password(PDO $db, int $cafeId, int $userId, string $newPassword, string $actorRole): bool
+{
+    if (strlen($newPassword) < 8) {
+        return false;
+    }
+
+    $stmt = $db->prepare(
+        'SELECT u.id, r.name AS role_name FROM users u
+         JOIN roles r ON r.id = u.role_id
+         WHERE u.id = :id AND u.cafe_id = :cafe_id AND u.deleted_at IS NULL
+         LIMIT 1'
+    );
+    $stmt->execute([':id' => $userId, ':cafe_id' => $cafeId]);
+    $target = $stmt->fetch();
+
+    if (!$target) {
+        return false;
+    }
+
+    if ($target['role_name'] === ROLE_ADMIN && $actorRole !== ROLE_ADMIN) {
+        return false;
+    }
+
+    $update = $db->prepare('UPDATE users SET password = :password WHERE id = :id');
+    return $update->execute([
+        ':password' => password_hash($newPassword, PASSWORD_DEFAULT),
+        ':id' => $userId,
+    ]);
+}
