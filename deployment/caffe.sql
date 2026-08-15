@@ -306,3 +306,17 @@ INSERT INTO `roles` (`name`, `description`) VALUES
   ('manager', 'Manage menu, pricing, users, and view/export reports'),
   ('cashier', 'Accept payments, reconcile transactions, issue receipts (also waitstaff)'),
   ('barista', 'Receive and prepare orders (also kitchen)');
+
+-- ---------------------------------------------------------------------------
+-- Seed data: financial_ledger lookups
+-- transaction_type = the nature of the event; account_type = which side of
+-- a simple owner-facing P&L it hits. Kept intentionally minimal for v1.
+-- ---------------------------------------------------------------------------
+INSERT INTO `ledger_transaction_types` (`name`) VALUES
+  ('sale'),
+  ('expense'),
+  ('refund');
+
+INSERT INTO `ledger_account_types` (`name`) VALUES
+  ('revenue'),
+  ('expense');
