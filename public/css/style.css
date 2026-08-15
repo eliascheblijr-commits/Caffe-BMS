@@ -642,3 +642,283 @@ button, input {
   font-size: 14px;
   margin-bottom: var(--space-2);
 }
+
+/* ==========================================================================
+   Manager dashboard — stat cards, inline admin forms, data table
+   ========================================================================== */
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-7);
+}
+
+.stat-card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.stat-card-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-chalk-dim);
+  margin-bottom: var(--space-2);
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.inline-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 160px;
+}
+
+.inline-form label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-chalk-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inline-form input,
+.inline-form select {
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-chalk);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.inline-form .btn-primary {
+  flex: 0 0 auto;
+  width: auto;
+  padding: var(--space-2) var(--space-5);
+  min-height: 40px;
+}
+
+.menu-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
+}
+
+.menu-admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+}
+
+.menu-admin-row.is-unavailable {
+  opacity: 0.55;
+}
+
+.menu-admin-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-admin-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.menu-admin-meta {
+  font-size: 12px;
+  color: var(--color-chalk-dim);
+}
+
+.btn-toggle {
+  flex: 0 0 auto;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: var(--color-chalk);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 32px;
+}
+
+.btn-toggle:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: var(--space-7);
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+.data-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-chalk-dim);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-pill--active {
+  background: rgba(143, 217, 182, 0.15);
+  color: #8fd9b6;
+}
+
+.status-pill--inactive {
+  background: rgba(226, 131, 107, 0.15);
+  color: var(--color-error);
+}
+
+/* ==========================================================================
+   Public menu — customer-facing, no auth
+   ========================================================================== */
+
+.public-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.public-menu {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+}
+
+.public-menu-hero {
+  text-align: center;
+  margin-bottom: var(--space-7);
+}
+
+.public-menu-hero-word {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--color-accent);
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
+.public-menu-hero h1 {
+  font-size: 32px;
+  margin: 0 0 var(--space-2);
+}
+
+.public-menu-address {
+  color: var(--color-chalk-dim);
+  font-size: 14px;
+  margin: 0;
+}
+
+.public-menu-category {
+  margin-bottom: var(--space-6);
+}
+
+.public-menu-category h2 {
+  font-size: 18px;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+
+.public-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.public-menu-item {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.public-menu-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.public-menu-item-top h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.public-menu-item-price {
+  font-weight: 700;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.public-menu-item-desc {
+  font-size: 13px;
+  color: var(--color-chalk-dim);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.auth-card--center {
+  text-align: center;
+}
+
+.auth-card--center .auth-subtitle {
+  margin-top: 0;
+}
