@@ -10,6 +10,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/CafeController.php';
+
 const LOGIN_MAX_ATTEMPTS = 5;
 const LOGIN_ATTEMPT_WINDOW_SECONDS = 900; // 15 minutes
 
@@ -63,7 +65,7 @@ function handle_login_submission(PDO $db): string
     }
 
     $stmt = $db->prepare(
-        'SELECT u.id, u.full_name, u.email, u.password, u.status, u.cafe_id, r.name AS role_name
+        'SELECT u.id, u.full_name, u.email, u.password, u.status, u.franchise_id, u.cafe_id, r.name AS role_name
          FROM users u
          JOIN roles r ON r.id = u.role_id
          WHERE u.email = :email AND u.deleted_at IS NULL
@@ -84,12 +86,28 @@ function handle_login_submission(PDO $db): string
 
     // Success — rotate the session ID on privilege change, then populate it.
     session_regenerate_id(true);
+
+    $cafeId = $user['cafe_id'] !== null ? (int) $user['cafe_id'] : null;
+    $franchiseId = (int) $user['franchise_id'];
+
+    // Branch-pinned roles are always active on their one cafe. Admin/owner
+    // (cafe_id NULL) defaults to the first branch in their franchise —
+    // same ordering the switcher dropdown uses — or null if it has none yet.
+    if ($cafeId !== null) {
+        $activeCafeId = $cafeId;
+    } else {
+        $franchiseCafes = list_cafes_for_franchise($db, $franchiseId);
+        $activeCafeId = $franchiseCafes[0]['id'] ?? null;
+    }
+
     $_SESSION['user'] = [
         'id' => (int) $user['id'],
         'full_name' => $user['full_name'],
         'email' => $user['email'],
         'role' => $user['role_name'],
-        'cafe_id' => $user['cafe_id'] !== null ? (int) $user['cafe_id'] : null,
+        'franchise_id' => $franchiseId,
+        'cafe_id' => $cafeId,
+        'active_cafe_id' => $activeCafeId,
     ];
 
     header('Location: ' . dashboard_for_role($user['role_name']));

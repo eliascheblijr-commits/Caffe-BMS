@@ -2,20 +2,27 @@
 
 /**
  * StaffController — staff account management for the manager dashboard.
+ *
+ * Scoping rule used throughout: a franchise's staff list for a given branch
+ * is everyone pinned to that branch (cafe_id = activeCafeId) PLUS every
+ * franchise-wide admin/owner (cafe_id IS NULL) — admins show up on every
+ * branch's staff list since they oversee all of them.
  */
 
 declare(strict_types=1);
 
-function list_staff(PDO $db, int $cafeId): array
+function list_staff(PDO $db, int $franchiseId, int $activeCafeId): array
 {
     $stmt = $db->prepare(
-        'SELECT u.id, u.full_name, u.email, u.status, r.name AS role_name
+        'SELECT u.id, u.full_name, u.email, u.status, u.cafe_id, r.name AS role_name
          FROM users u
          JOIN roles r ON r.id = u.role_id
-         WHERE u.cafe_id = :cafe_id AND u.deleted_at IS NULL
-         ORDER BY u.full_name ASC'
+         WHERE u.franchise_id = :franchise_id
+           AND u.deleted_at IS NULL
+           AND (u.cafe_id = :cafe_id OR u.cafe_id IS NULL)
+         ORDER BY (u.cafe_id IS NULL) DESC, u.full_name ASC'
     );
-    $stmt->execute([':cafe_id' => $cafeId]);
+    $stmt->execute([':franchise_id' => $franchiseId, ':cafe_id' => $activeCafeId]);
     return $stmt->fetchAll();
 }
 
@@ -39,13 +46,17 @@ function list_assignable_roles(PDO $db, string $creatorRole): array
 }
 
 /**
- * Creates a new staff account. Returns the new user id, or null on any
- * validation failure (bad email, duplicate email, unknown/disallowed role,
- * password under 8 chars) — callers show one generic error either way.
+ * Creates a new staff account. $cafeId is the branch to pin them to — it's
+ * ignored (forced to NULL) when $roleName is admin, since admin/owner
+ * operates franchise-wide rather than being pinned to one branch. Returns
+ * the new user id, or null on any validation failure (bad email, duplicate
+ * email, unknown/disallowed role, password under 8 chars, or a non-admin
+ * role with no branch to pin it to) — callers show one generic error either way.
  */
 function create_staff_member(
     PDO $db,
-    int $cafeId,
+    int $franchiseId,
+    ?int $cafeId,
     string $fullName,
     string $email,
     string $phone,
@@ -65,6 +76,11 @@ function create_staff_member(
         return null; // non-admins can never grant admin, regardless of what the form sent
     }
 
+    $assignedCafeId = $roleName === ROLE_ADMIN ? null : $cafeId;
+    if ($roleName !== ROLE_ADMIN && $assignedCafeId === null) {
+        return null; // branch-pinned roles need an actual branch
+    }
+
     $roleStmt = $db->prepare('SELECT id FROM roles WHERE name = :name');
     $roleStmt->execute([':name' => $roleName]);
     $roleId = $roleStmt->fetchColumn();
@@ -79,15 +95,16 @@ function create_staff_member(
     }
 
     $insert = $db->prepare(
-        "INSERT INTO users (full_name, email, phone_number, password, cafe_id, role_id, status)
-         VALUES (:full_name, :email, :phone, :password, :cafe_id, :role_id, 'active')"
+        "INSERT INTO users (full_name, email, phone_number, password, franchise_id, cafe_id, role_id, status)
+         VALUES (:full_name, :email, :phone, :password, :franchise_id, :cafe_id, :role_id, 'active')"
     );
     $insert->execute([
         ':full_name' => $fullName,
         ':email' => $email,
         ':phone' => $phone,
         ':password' => password_hash($password, PASSWORD_DEFAULT),
-        ':cafe_id' => $cafeId,
+        ':franchise_id' => $franchiseId,
+        ':cafe_id' => $assignedCafeId,
         ':role_id' => $roleId,
     ]);
 
@@ -96,11 +113,19 @@ function create_staff_member(
 
 /**
  * Manager-assisted password reset — sets a new password directly, no email
- * involved. Same admin-protection rule as role assignment: a non-admin
- * can't reset an admin's password, regardless of what the form sent.
+ * involved. Scoped the same way list_staff() is (this branch's pinned staff
+ * plus franchise-wide admins), so a manager can't reach into another
+ * branch. Same admin-protection rule as role assignment: a non-admin can't
+ * reset an admin's password, regardless of what the form sent.
  */
-function reset_staff_password(PDO $db, int $cafeId, int $userId, string $newPassword, string $actorRole): bool
-{
+function reset_staff_password(
+    PDO $db,
+    int $franchiseId,
+    int $activeCafeId,
+    int $userId,
+    string $newPassword,
+    string $actorRole
+): bool {
     if (strlen($newPassword) < 8) {
         return false;
     }
@@ -108,10 +133,13 @@ function reset_staff_password(PDO $db, int $cafeId, int $userId, string $newPass
     $stmt = $db->prepare(
         'SELECT u.id, r.name AS role_name FROM users u
          JOIN roles r ON r.id = u.role_id
-         WHERE u.id = :id AND u.cafe_id = :cafe_id AND u.deleted_at IS NULL
+         WHERE u.id = :id
+           AND u.franchise_id = :franchise_id
+           AND (u.cafe_id = :cafe_id OR u.cafe_id IS NULL)
+           AND u.deleted_at IS NULL
          LIMIT 1'
     );
-    $stmt->execute([':id' => $userId, ':cafe_id' => $cafeId]);
+    $stmt->execute([':id' => $userId, ':franchise_id' => $franchiseId, ':cafe_id' => $activeCafeId]);
     $target = $stmt->fetch();
 
     if (!$target) {

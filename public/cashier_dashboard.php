@@ -9,6 +9,7 @@ require_once CONTROLLERS_PATH . '/MenuController.php';
 require_role(ROLE_ADMIN, ROLE_CASHIER);
 
 $user = current_user();
+$activeCafeId = $user['active_cafe_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
@@ -16,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Invalid request.');
     }
 
-    if ($user['cafe_id'] !== null) {
+    if ($activeCafeId !== null) {
         $action = (string) ($_POST['action'] ?? '');
 
         if ($action === 'create_order') {
@@ -24,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (is_array($cartData)) {
                 create_order(
                     db(),
-                    $user['cafe_id'],
+                    $activeCafeId,
                     $user['id'],
                     trim((string) ($_POST['customer_name'] ?? '')),
                     trim((string) ($_POST['customer_contact'] ?? '')),
@@ -37,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $payerName = trim((string) ($_POST['payer_name'] ?? ''));
 
             if ($orderId > 0) {
-                complete_order_with_payment(db(), $orderId, $user['cafe_id'], $method, $user['id'], $payerName);
+                complete_order_with_payment(db(), $orderId, $activeCafeId, $method, $user['id'], $payerName);
             }
         }
     }
@@ -46,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$menuCategories = $user['cafe_id'] !== null ? list_menu_by_category(db(), $user['cafe_id']) : [];
-$readyOrders = $user['cafe_id'] !== null ? list_ready_orders(db(), $user['cafe_id']) : [];
+$menuCategories = $activeCafeId !== null ? list_menu_by_category(db(), $activeCafeId) : [];
+$readyOrders = $activeCafeId !== null ? list_ready_orders(db(), $activeCafeId) : [];
 
 require VIEWS_PATH . '/cashier_dashboard.view.php';

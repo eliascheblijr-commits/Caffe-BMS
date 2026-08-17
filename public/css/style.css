@@ -256,6 +256,39 @@ button, input {
   color: var(--color-accent);
 }
 
+.staff-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.branch-switcher {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.branch-switcher-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-chalk-dim);
+}
+
+.branch-switcher select {
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-chalk);
+  font-size: 13px;
+}
+
+.branch-switcher-single {
+  font-size: 13px;
+  color: var(--color-chalk-dim);
+}
+
 .staff-header-right {
   display: flex;
   align-items: center;

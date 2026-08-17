@@ -10,6 +10,8 @@ require_once CONTROLLERS_PATH . '/ReportController.php';
 require_role(ROLE_ADMIN, ROLE_MANAGER);
 
 $user = current_user();
+$activeCafeId = $user['active_cafe_id'];
+$franchiseId = $user['franchise_id'];
 $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -18,27 +20,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Invalid request.');
     }
 
-    if ($user['cafe_id'] !== null) {
+    if ($activeCafeId !== null) {
         $action = (string) ($_POST['action'] ?? '');
 
         if ($action === 'add_category') {
-            create_menu_category(db(), $user['cafe_id'], (string) ($_POST['name'] ?? ''));
+            create_menu_category(db(), $activeCafeId, (string) ($_POST['name'] ?? ''));
         } elseif ($action === 'add_item') {
             $categoryId = (($_POST['category_id'] ?? '') !== '') ? (int) $_POST['category_id'] : null;
             create_menu_item(
                 db(),
-                $user['cafe_id'],
+                $activeCafeId,
                 $categoryId,
                 (string) ($_POST['name'] ?? ''),
                 trim((string) ($_POST['description'] ?? '')),
                 (string) ($_POST['price'] ?? '0')
             );
         } elseif ($action === 'toggle_item') {
-            toggle_menu_item_availability(db(), $user['cafe_id'], (int) ($_POST['item_id'] ?? 0));
+            toggle_menu_item_availability(db(), $activeCafeId, (int) ($_POST['item_id'] ?? 0));
         } elseif ($action === 'add_staff') {
             $created = create_staff_member(
                 db(),
-                $user['cafe_id'],
+                $franchiseId,
+                $activeCafeId,
                 (string) ($_POST['full_name'] ?? ''),
                 (string) ($_POST['email'] ?? ''),
                 (string) ($_POST['phone'] ?? ''),
@@ -53,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $targetUserId = (int) ($_POST['user_id'] ?? 0);
             $newPassword = (string) ($_POST['new_password'] ?? '');
 
-            if ($targetUserId > 0 && !reset_staff_password(db(), $user['cafe_id'], $targetUserId, $newPassword, $user['role'])) {
+            if ($targetUserId > 0 && !reset_staff_password(db(), $franchiseId, $activeCafeId, $targetUserId, $newPassword, $user['role'])) {
                 $error = 'Could not reset that password — check it\'s at least 8 characters and you have permission.';
             }
         }
@@ -65,12 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$stats = $user['cafe_id'] !== null
-    ? today_snapshot(db(), $user['cafe_id'])
+$stats = $activeCafeId !== null
+    ? today_snapshot(db(), $activeCafeId)
     : ['revenue_today' => 0, 'orders_today' => 0, 'active_orders' => 0];
-$menuItems = $user['cafe_id'] !== null ? list_menu_admin(db(), $user['cafe_id']) : [];
-$categories = $user['cafe_id'] !== null ? list_menu_categories(db(), $user['cafe_id']) : [];
-$staff = $user['cafe_id'] !== null ? list_staff(db(), $user['cafe_id']) : [];
+$menuItems = $activeCafeId !== null ? list_menu_admin(db(), $activeCafeId) : [];
+$categories = $activeCafeId !== null ? list_menu_categories(db(), $activeCafeId) : [];
+$staff = $activeCafeId !== null ? list_staff(db(), $franchiseId, $activeCafeId) : [];
 $assignableRoles = list_assignable_roles(db(), $user['role']);
 
 require VIEWS_PATH . '/manager_dashboard.view.php';

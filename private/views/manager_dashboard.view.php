@@ -148,6 +148,7 @@
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
+                    <th>Branch</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -158,6 +159,7 @@
                         <td><?= htmlspecialchars($member['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($member['email'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars(ucfirst($member['role_name']), ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= $member['cafe_id'] === null ? 'All branches' : 'This branch' ?></td>
                         <td><span class="status-pill status-pill--<?= $member['status'] === 'active' ? 'active' : 'inactive' ?>"><?= htmlspecialchars($member['status'], ENT_QUOTES, 'UTF-8') ?></span></td>
                         <td>
                             <button type="button" class="btn-toggle js-toggle" data-target="reset-<?= (int) $member['id'] ?>">Reset Password</button>

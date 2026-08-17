@@ -25,11 +25,26 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ---------------------------------------------------------------------------
--- cafes — multi-tenant root (renamed from `gyms`)
+-- franchises — the true top-level tenant. One owner/franchise can run
+-- multiple cafe branches; admin/owner users belong to a franchise (not a
+-- single cafe) and operate across all of its branches via a context
+-- switcher. Manager/cashier/barista stay pinned to one cafe via users.cafe_id.
+-- ---------------------------------------------------------------------------
+DROP TABLE IF EXISTS `franchises`;
+CREATE TABLE `franchises` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ---------------------------------------------------------------------------
+-- cafes — a single branch, belonging to one franchise
 -- ---------------------------------------------------------------------------
 DROP TABLE IF EXISTS `cafes`;
 CREATE TABLE `cafes` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `franchise_id` bigint unsigned NOT NULL,
   `name` varchar(255) NOT NULL,
   `slug` varchar(100) NOT NULL,
   `address` text,
@@ -37,11 +52,17 @@ CREATE TABLE `cafes` (
   `status` enum('active','suspended','trial') DEFAULT 'active',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `slug` (`slug`)
+  UNIQUE KEY `slug` (`slug`),
+  KEY `fk_cafe_franchise` (`franchise_id`),
+  CONSTRAINT `fk_cafe_franchise` FOREIGN KEY (`franchise_id`) REFERENCES `franchises` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ---------------------------------------------------------------------------
 -- users — staff accounts only (barista, cashier, manager, admin)
+-- Every user belongs to a franchise. Branch-pinned roles (manager, cashier,
+-- barista) also have cafe_id set to their one branch. Admin/owner leaves
+-- cafe_id NULL and operates across every cafe in franchise_id instead —
+-- see the branch switcher (CafeController::list_cafes_for_franchise()).
 -- ---------------------------------------------------------------------------
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
@@ -51,6 +72,7 @@ CREATE TABLE `users` (
   `phone_number` varchar(20) NOT NULL,
   `password` varchar(255) NOT NULL,
   `profile_pic` varchar(255) DEFAULT NULL,
+  `franchise_id` bigint unsigned NOT NULL,
   `cafe_id` bigint unsigned DEFAULT NULL,
   `role_id` bigint unsigned NOT NULL,
   `status` varchar(20) DEFAULT 'active',
@@ -60,8 +82,10 @@ CREATE TABLE `users` (
   `deletion_scheduled_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
+  KEY `fk_user_franchise` (`franchise_id`),
   KEY `fk_user_cafe` (`cafe_id`),
   KEY `fk_user_role` (`role_id`),
+  CONSTRAINT `fk_user_franchise` FOREIGN KEY (`franchise_id`) REFERENCES `franchises` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_user_cafe` FOREIGN KEY (`cafe_id`) REFERENCES `cafes` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_user_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

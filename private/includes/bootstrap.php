@@ -164,9 +164,16 @@ function csrf_verify(?string $token): bool
 // ---------------------------------------------------------------------------
 // Auth helpers
 // Session shape once logged in: $_SESSION['user'] = [
-//     'id' => int, 'full_name' => string, 'email' => string,
-//     'role' => string, 'cafe_id' => int|null,
+//     'id' => int, 'full_name' => string, 'email' => string, 'role' => string,
+//     'franchise_id' => int, 'cafe_id' => int|null, 'active_cafe_id' => int|null,
 // ]
+// cafe_id is the user's pinned branch (set for manager/cashier/barista, null
+// for admin/owner, who operate across every cafe in franchise_id instead).
+// active_cafe_id is whichever branch is currently being viewed/operated on
+// -- equal to cafe_id for pinned roles, and switchable for admin/owner via
+// the branch switcher (see CafeController, switch_cafe.php). Always read
+// active_cafe_id when scoping a query to "the current branch" -- reading
+// cafe_id directly would break for admins.
 // ---------------------------------------------------------------------------
 function current_user(): ?array
 {

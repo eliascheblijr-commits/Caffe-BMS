@@ -164,9 +164,23 @@
     });
   }
 
+  /**
+   * Select elements inside a .js-auto-submit form submit on change, rather
+   * than needing an explicit "Go" button — used by the branch switcher.
+   */
+  function initAutoSubmitForms() {
+    var selects = document.querySelectorAll('.js-auto-submit select');
+    selects.forEach(function (select) {
+      select.addEventListener('change', function () {
+        select.form.submit();
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initMenuButtons();
     initToggles();
+    initAutoSubmitForms();
     renderCart();
   });
 })();

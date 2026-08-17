@@ -30,3 +30,29 @@ function resolve_public_cafe(PDO $db, string $slug): ?array
 
     return count($cafes) === 1 ? $cafes[0] : null;
 }
+
+/**
+ * All cafes under a franchise, for the admin/owner branch switcher.
+ * Ordered by name so the dropdown and the "default active branch on login"
+ * logic in AuthController agree on which one is "first".
+ */
+function list_cafes_for_franchise(PDO $db, int $franchiseId): array
+{
+    $stmt = $db->prepare(
+        "SELECT id, name FROM cafes WHERE franchise_id = :franchise_id AND status = 'active' ORDER BY name ASC"
+    );
+    $stmt->execute([':franchise_id' => $franchiseId]);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Validates that $cafeId is actually part of $franchiseId before letting a
+ * switch-branch request set it as the active cafe — without this, an
+ * admin could switch into another franchise's data by guessing an id.
+ */
+function cafe_belongs_to_franchise(PDO $db, int $cafeId, int $franchiseId): bool
+{
+    $stmt = $db->prepare('SELECT id FROM cafes WHERE id = :id AND franchise_id = :franchise_id LIMIT 1');
+    $stmt->execute([':id' => $cafeId, ':franchise_id' => $franchiseId]);
+    return (bool) $stmt->fetchColumn();
+}
