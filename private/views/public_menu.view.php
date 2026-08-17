@@ -3,6 +3,7 @@
  * @var array|null $cafe
  * @var string $slug
  * @var array $menuCategories
+ * @var array $cafeDirectory  only populated when $cafe is null and $slug is empty
  */
 ?>
 <!DOCTYPE html>
@@ -17,7 +18,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="public-page">
-    <?php if ($cafe === null): ?>
+    <?php if ($cafe === null && $slug !== ''): ?>
         <main class="auth-page">
             <div class="auth-card auth-card--center">
                 <div class="auth-brand">
@@ -25,13 +26,30 @@
                     <svg class="auth-brand-swash" viewBox="0 0 140 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <path d="M2 6.5C22 2 40 10 60 6C80 2 98 10 118 5.5C126 4 132 6 138 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                     </svg>
-                    <p class="auth-subtitle">
-                        <?= $slug === ''
-                            ? 'This link needs a café — try a URL like ?cafe=your-slug.'
-                            : 'We couldn\'t find a café at that link.' ?>
-                    </p>
+                    <p class="auth-subtitle">We couldn't find a café at that link.</p>
                 </div>
             </div>
+        </main>
+    <?php elseif ($cafe === null): ?>
+        <main class="public-menu">
+            <header class="public-menu-hero">
+                <span class="public-menu-hero-word">Caffe BMS</span>
+                <h1>Choose your café</h1>
+            </header>
+
+            <?php if (empty($cafeDirectory)): ?>
+                <div class="staff-empty">No cafés are published yet — check back soon.</div>
+            <?php else: ?>
+                <ul class="cafe-directory">
+                    <?php foreach ($cafeDirectory as $listing): ?>
+                        <li>
+                            <a href="/index.php?cafe=<?= urlencode($listing['slug']) ?>" class="cafe-directory-link">
+                                <?= htmlspecialchars($listing['name'], ENT_QUOTES, 'UTF-8') ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
         </main>
     <?php else: ?>
         <main class="public-menu">

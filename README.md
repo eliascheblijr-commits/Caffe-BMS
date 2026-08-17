@@ -20,13 +20,13 @@ This blueprint covers: product goals, user roles and permissions, key features, 
 - Customer: Browse public menu, place orders, optionally pay online.
 - Barista / Waitstaff: Receive orders, update order status, mark items prepared.
 - Cashier: Accept payments, reconcile transactions, issue receipts.
-- Manager: Manage menus, prices, inventory (optional), view/export reports, manage users and permissions.
+- Manager: Manage menus, prices, upload menu pictures, inventory, view/export reports, manage users and permissions.
 
 Note: In small setups, the Waitstaff and Cashier roles can be combined.
 
 ## Key Features
 
-- Public Virtual Menu: Browsable without authentication; images and descriptions supported.
+- Public Virtual Menu: Browsable without authentication; images and descriptions supported and customers can place orders.
 - Order Management: Create, update, and track orders (queued, preparing, ready, completed).
 - Payments: Integrate with payment gateway(s); record and reconcile payments.
 - Financial Ledger: Immutable transaction log for audits and reporting.

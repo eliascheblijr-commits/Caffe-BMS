@@ -32,6 +32,17 @@ function resolve_public_cafe(PDO $db, string $slug): ?array
 }
 
 /**
+ * Every active café, across every franchise, for the public "choose your
+ * café" picker shown when index.php gets no slug and there's more than
+ * one to pick from.
+ */
+function list_all_active_cafes(PDO $db): array
+{
+    $stmt = $db->query("SELECT name, slug FROM cafes WHERE status = 'active' ORDER BY name ASC");
+    return $stmt->fetchAll();
+}
+
+/**
  * All cafes under a franchise, for the admin/owner branch switcher.
  * Ordered by name so the dropdown and the "default active branch on login"
  * logic in AuthController agree on which one is "first".
